@@ -72,10 +72,6 @@ const AgentDashboard = () => {
 
   // Load agents from localStorage
   useEffect(() => {
-    // Clear all data to start fresh
-    localStorage.removeItem("agents");
-    localStorage.removeItem("testRuns");
-    
     const loadAgents = () => {
       const savedAgents = localStorage.getItem("agents");
       if (savedAgents) {
