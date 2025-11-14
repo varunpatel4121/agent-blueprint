@@ -30,7 +30,7 @@ export function AppSidebar() {
             </div>
             {open && (
               <div>
-                <h1 className="text-foreground font-semibold text-base">Windtunnel</h1>
+                <h1 className="text-foreground font-semibold text-base">Arena</h1>
               </div>
             )}
           </div>
