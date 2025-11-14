@@ -10,19 +10,11 @@ import {
   ChevronRight,
   ArrowLeft
 } from "lucide-react";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
 
 const RunResults = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const testData = location.state;
-  
-  const [selectedScenario, setSelectedScenario] = useState<any>(null);
 
   // Mock results
   const mockResults = {
@@ -238,7 +230,7 @@ shipping:  # NEW: Country-specific details
             {mockResults.scenarioResults.map((result) => (
               <div
                 key={result.id}
-                onClick={() => setSelectedScenario(result)}
+                onClick={() => navigate("/simulation/" + result.id, { state: { scenario: result } })}
                 className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
               >
                 <div className="flex items-center gap-3 flex-1">
@@ -278,66 +270,6 @@ shipping:  # NEW: Country-specific details
           </Button>
         </Card>
       </div>
-
-      {/* Scenario Detail Drawer */}
-      <Sheet open={!!selectedScenario} onOpenChange={() => setSelectedScenario(null)}>
-        <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
-          {selectedScenario && (
-            <>
-              <SheetHeader>
-                <SheetTitle className="flex items-center gap-3">
-                  {getStatusIcon(selectedScenario.status)}
-                  {selectedScenario.name}
-                </SheetTitle>
-              </SheetHeader>
-
-              <div className="mt-6 space-y-6">
-                <div>
-                  <h3 className="text-sm font-medium text-foreground mb-2">Prompt sent to agent</h3>
-                  <div className="bg-muted/50 rounded-lg p-3 border border-border">
-                    <p className="text-sm text-foreground">{selectedScenario.prompt}</p>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-sm font-medium text-foreground mb-2">Agent response</h3>
-                  <div className="bg-muted/50 rounded-lg p-3 border border-border">
-                    <p className="text-sm text-foreground">{selectedScenario.response}</p>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-sm font-medium text-foreground mb-2">Expected behavior</h3>
-                  <div className="bg-muted/50 rounded-lg p-3 border border-border">
-                    <p className="text-sm text-foreground">{selectedScenario.expected}</p>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-sm font-medium text-foreground mb-2">Analysis</h3>
-                  <ul className="space-y-2">
-                    {selectedScenario.why.map((reason: string, idx: number) => (
-                      <li key={idx} className="flex items-start gap-2 text-sm text-foreground">
-                        <span className="text-muted-foreground">•</span>
-                        {reason}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {selectedScenario.suggestion && (
-                  <div className="pt-4 border-t border-border">
-                    <h3 className="text-sm font-medium text-foreground mb-2">Suggested improvement</h3>
-                    <div className="bg-accent/5 border border-accent/20 rounded-lg p-3">
-                      <p className="text-sm text-foreground">{selectedScenario.suggestion}</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </>
-          )}
-        </SheetContent>
-      </Sheet>
     </div>
   );
 };
