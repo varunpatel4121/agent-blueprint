@@ -98,9 +98,9 @@ const AgentDashboard = () => {
       localStorage.setItem("agents", JSON.stringify(savedAgents));
       setAgents(savedAgents);
       
-      // Update selected agent
-      if (selectedAgent?.id === agentId) {
-        setSelectedAgent(savedAgents[agentIndex]);
+      // Clear selected agent if it was archived and will disappear from view
+      if (selectedAgent?.id === agentId && currentStatus !== "archived") {
+        setSelectedAgent(null);
       }
     }
   };
@@ -122,7 +122,17 @@ const AgentDashboard = () => {
       agent.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       agent.description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesType = typeFilter === "all" || agent.type === typeFilter;
-    const matchesStatus = statusFilter === "all" || agent.status === statusFilter;
+    
+    // Filter by status - exclude archived unless explicitly selected
+    let matchesStatus = true;
+    if (statusFilter === "archived") {
+      matchesStatus = agent.status === "archived";
+    } else if (statusFilter === "all") {
+      matchesStatus = agent.status !== "archived"; // Hide archived by default
+    } else {
+      matchesStatus = agent.status === statusFilter;
+    }
+    
     return matchesSearch && matchesType && matchesStatus;
   });
 
