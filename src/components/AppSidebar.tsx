@@ -24,11 +24,11 @@ export function AppSidebar() {
       <SidebarContent>
         {/* Logo/Brand */}
         <div className="px-6 py-6 border-b border-border">
-          <div className="flex items-center gap-2">
-            <img src={logo} alt="Arena Logo" className="w-8 h-8" />
+          <div className="flex items-center gap-3">
+            <img src={logo} alt="Arena Logo" className="w-12 h-12 rounded-xl" />
             {open && (
               <div>
-                <h1 className="text-foreground font-semibold text-base">Arena</h1>
+                <h1 className="text-foreground font-semibold text-lg">Arena</h1>
               </div>
             )}
           </div>
