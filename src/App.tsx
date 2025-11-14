@@ -7,6 +7,7 @@ import { AppLayout } from "./components/AppLayout";
 import NewTest from "./pages/NewTest";
 import RunResults from "./pages/RunResults";
 import RunsHistory from "./pages/RunsHistory";
+import SimulationDetail from "./pages/SimulationDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,6 +23,7 @@ const App = () => (
             <Route path="/" element={<NewTest />} />
             <Route path="/run" element={<RunResults />} />
             <Route path="/runs" element={<RunsHistory />} />
+            <Route path="/simulation/:id" element={<SimulationDetail />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AppLayout>
