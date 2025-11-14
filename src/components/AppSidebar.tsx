@@ -1,5 +1,6 @@
 import { Home } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
+import logo from "@/assets/logo.png";
 import {
   Sidebar,
   SidebarContent,
@@ -24,9 +25,7 @@ export function AppSidebar() {
         {/* Logo/Brand */}
         <div className="px-6 py-6 border-b border-border">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-sm">A</span>
-            </div>
+            <img src={logo} alt="Arena Logo" className="w-8 h-8" />
             {open && (
               <div>
                 <h1 className="text-foreground font-semibold text-base">Arena</h1>
