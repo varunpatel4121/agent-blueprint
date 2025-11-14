@@ -9,6 +9,7 @@ import Agents from "./pages/Agents";
 import AgentDetail from "./pages/AgentDetail";
 import Blueprints from "./pages/Blueprints";
 import Simulations from "./pages/Simulations";
+import SimulationDetail from "./pages/SimulationDetail";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/agents/:id" element={<AgentDetail />} />
             <Route path="/blueprints" element={<Blueprints />} />
             <Route path="/simulations" element={<Simulations />} />
+            <Route path="/simulations/:id" element={<SimulationDetail />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="*" element={<NotFound />} />
