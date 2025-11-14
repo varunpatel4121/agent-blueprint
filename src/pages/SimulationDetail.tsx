@@ -178,13 +178,18 @@ const SimulationDetail = () => {
         <div className="space-y-6">
           {/* Expected Behavior */}
           <div>
-            <h3 className="text-sm font-medium text-foreground mb-2">Expected Behavior</h3>
-            <div className="bg-muted/50 rounded-lg p-4 border border-border">
-              <p className="text-sm text-foreground">{scenario.expected}</p>
-            </div>
+            <h3 className="text-sm font-medium text-foreground mb-3">Expected Behavior</h3>
+            <ul className="space-y-2">
+              {(Array.isArray(scenario.expected) ? scenario.expected : [scenario.expected]).map((item: string, idx: number) => (
+                <li key={idx} className="flex items-start gap-3">
+                  <div className="w-1.5 h-1.5 rounded-full mt-2 bg-primary" />
+                  <p className="text-sm text-foreground flex-1">{item}</p>
+                </li>
+              ))}
+            </ul>
           </div>
 
-          {/* Analysis */}
+          {/* What Happened */}
           <div>
             <h3 className="text-sm font-medium text-foreground mb-3">What Happened</h3>
             <ul className="space-y-2">
@@ -201,15 +206,32 @@ const SimulationDetail = () => {
             </ul>
           </div>
 
-          {/* Suggested Fix */}
-          {scenario.suggestion && (
-            <div className="pt-6 border-t border-border">
-              <h3 className="text-sm font-medium text-foreground mb-3">Suggested Improvement</h3>
-              <div className="bg-accent/5 border border-accent/20 rounded-lg p-4 mb-4">
-                <p className="text-sm text-foreground font-mono">{scenario.suggestion}</p>
+          {/* Why It Matters */}
+          {scenario.impact && (
+            <div>
+              <h3 className="text-sm font-medium text-foreground mb-3">Why It Matters</h3>
+              <div className="bg-muted/50 rounded-lg p-4 border border-border">
+                <p className="text-sm text-foreground leading-relaxed">{scenario.impact}</p>
               </div>
+            </div>
+          )}
+
+          {/* Suggested Improvements */}
+          {scenario.suggestions && (
+            <div className="pt-4 border-t border-border">
+              <h3 className="text-sm font-medium text-foreground mb-3">Suggested Improvements</h3>
+              <ul className="space-y-2.5 mb-4">
+                {scenario.suggestions.map((suggestion: string, idx: number) => (
+                  <li key={idx} className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-5 h-5 rounded-full bg-accent/10 border border-accent/30 flex items-center justify-center mt-0.5">
+                      <span className="text-xs font-semibold text-accent">{idx + 1}</span>
+                    </div>
+                    <p className="text-sm text-foreground flex-1">{suggestion}</p>
+                  </li>
+                ))}
+              </ul>
               <Button className="w-full">
-                Apply Suggested Fix
+                Apply Suggested Improvements
               </Button>
             </div>
           )}

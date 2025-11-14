@@ -34,9 +34,15 @@ const RunResults = () => {
         score: 65,
         prompt: "I need headphones under $100 with 2-day delivery",
         response: "I found the XR-2000 wireless headphones for $89.99. Standard shipping is 5-7 days, or you can upgrade to express for $15.",
-        expected: "Agent should automatically check 2-day delivery options",
-        why: ["Agent found product within budget", "Failed to filter by 2-day delivery requirement", "Should have shown only 2-day eligible items"],
-        suggestion: "Add explicit delivery time filtering in initial query",
+        expected: ["Identify both budget and delivery constraints", "Filter products by 2-day delivery availability", "Return only options meeting both criteria"],
+        why: ["Successfully found product within budget constraint", "Failed to filter by 2-day delivery requirement upfront", "Required user to manually check delivery upgrade options"],
+        impact: "Forces users to do extra work checking delivery options, reducing conversion and creating friction in the purchase flow.",
+        suggestions: [
+          "Add delivery time as a primary filter in product search",
+          "Query only items with 2-day delivery already enabled",
+          "Surface delivery constraints earlier in the search logic",
+          "Provide clear indication when constraints conflict with available inventory"
+        ],
       },
       {
         id: "sc-002",
@@ -46,9 +52,10 @@ const RunResults = () => {
         score: 85,
         prompt: "Do you have the XR-3000 in black?",
         response: "The XR-3000 in black is currently out of stock. We have the XR-3000 in silver available, or the XR-2000 in black as an alternative. Would you like to be notified when black comes back in stock?",
-        expected: "Agent suggests alternatives and backorder option",
-        why: ["Correctly identified out-of-stock status", "Provided relevant alternatives", "Offered restock notification"],
-        suggestion: null,
+        expected: ["Identify out-of-stock condition", "Suggest relevant alternatives", "Offer backorder or notification option"],
+        why: ["Correctly identified out-of-stock status", "Provided relevant alternatives (same model different color, similar model same color)", "Offered restock notification as expected"],
+        impact: null,
+        suggestions: null,
       },
       {
         id: "sc-003",
@@ -58,9 +65,15 @@ const RunResults = () => {
         score: 30,
         prompt: "I need size M, can only pick up in San Francisco",
         response: "Size M is available. Our stores are located nationwide.",
-        expected: "Agent should check SF-specific inventory",
-        why: ["Did not filter by location", "Generic response without location-aware inventory check", "Failed to provide SF store-specific availability"],
-        suggestion: "Implement location-based inventory filtering",
+        expected: ["Detect location-specific request", "Query SF store inventory specifically", "Respond with SF-scoped availability"],
+        why: ["Missed the location cue in user request", "Returned generic nationwide inventory response", "Did not perform SF-specific availability check"],
+        impact: "Creates misleading availability results and can cause incorrect orders or wasted customer trips to stores without stock.",
+        suggestions: [
+          "Add explicit location-awareness logic to parse city/store names",
+          "Filter inventory queries by detected store or city parameter",
+          "Include validation ensuring response matches requested location",
+          "If location data unavailable, ask user to confirm their store preference"
+        ],
       },
       {
         id: "sc-004",
@@ -94,9 +107,15 @@ const RunResults = () => {
         score: 40,
         prompt: "I want the cheapest option but I need it tomorrow",
         response: "Our cheapest option is $29.99 with standard shipping.",
-        expected: "Agent should identify conflict and ask for prioritization",
-        why: ["Did not acknowledge delivery constraint", "Failed to address conflicting requirements", "Should have asked for priority: price vs delivery time"],
-        suggestion: "Add conflict detection for competing constraints",
+        expected: ["Detect conflicting constraints (price vs speed)", "Identify impossibility or tradeoff", "Ask user to prioritize one constraint"],
+        why: ["Did not acknowledge delivery constraint at all", "Failed to address the temporal requirement", "Did not ask for priority between price and delivery time"],
+        impact: "User receives misleading information and cannot complete their urgent purchase, leading to frustration and abandoned cart.",
+        suggestions: [
+          "Add conflict detection logic for competing constraints",
+          "When constraints conflict, explicitly ask which matters more",
+          "Provide comparison: cheapest with slow delivery vs fastest with higher cost",
+          "Make tradeoffs transparent in the response"
+        ],
       },
       {
         id: "sc-007",
