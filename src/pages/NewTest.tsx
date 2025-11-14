@@ -101,7 +101,7 @@ const NewTest = () => {
       scenarios,
     };
     
-    navigate("/run", { state: testData });
+    navigate("/execution", { state: testData });
   };
 
   return (
