@@ -2,3 +2,6 @@ project_id = "pczmwbvopqxzomuloutw"
 
 [functions.generate-test-scenarios]
 verify_jwt = false
+
+[functions.run-agent-tests]
+verify_jwt = false
