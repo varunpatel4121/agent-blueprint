@@ -1,1 +1,4 @@
 project_id = "pczmwbvopqxzomuloutw"
+
+[functions.generate-test-scenarios]
+verify_jwt = false
