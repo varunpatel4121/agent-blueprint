@@ -19,6 +19,7 @@ import {
   Zap,
   Target,
 } from "lucide-react";
+import { BlueprintGenerator } from "@/components/BlueprintGenerator";
 
 const AgentDetail = () => {
   const { id } = useParams();
@@ -169,6 +170,7 @@ const AgentDetail = () => {
           <TabsTrigger value="config">Configuration</TabsTrigger>
           <TabsTrigger value="goals">Goals & Capabilities</TabsTrigger>
           <TabsTrigger value="coverage">Test Coverage</TabsTrigger>
+          <TabsTrigger value="blueprint">Generate Blueprint</TabsTrigger>
           <TabsTrigger value="history">History</TabsTrigger>
         </TabsList>
 
@@ -355,6 +357,14 @@ const AgentDetail = () => {
               Detailed test coverage analysis and recommendations coming soon.
             </p>
           </Card>
+        </TabsContent>
+
+        {/* Blueprint Generator Tab */}
+        <TabsContent value="blueprint">
+          <BlueprintGenerator 
+            agentName={agent.name}
+            agentDescription={agent.description}
+          />
         </TabsContent>
 
         {/* History Tab */}
