@@ -17,8 +17,10 @@ import {
   Shield, 
   CheckCircle2,
   AlertTriangle,
-  AlertCircle
+  AlertCircle,
+  Play
 } from "lucide-react";
+import { SimulationRunner } from "./SimulationRunner";
 
 interface BlueprintGeneratorProps {
   agentName: string;
@@ -516,6 +518,8 @@ export const BlueprintGenerator = ({ agentName, agentDescription }: BlueprintGen
   const [isGenerating, setIsGenerating] = useState(false);
   const [blueprint, setBlueprint] = useState<any>(null);
   const [description, setDescription] = useState(agentDescription);
+  const [showSimulation, setShowSimulation] = useState(false);
+  const [selectedSuite, setSelectedSuite] = useState<any>(null);
 
   const handleGenerate = () => {
     setIsGenerating(true);
@@ -721,11 +725,40 @@ export const BlueprintGenerator = ({ agentName, agentDescription }: BlueprintGen
               <CheckCircle2 className="h-4 w-4 mr-2" />
               Save as Blueprint
             </Button>
-            <Button variant="outline" className="flex-1">
-              <Zap className="h-4 w-4 mr-2" />
-              Run Tests Now
+            <Button 
+              variant="outline" 
+              className="flex-1"
+              onClick={() => {
+                setSelectedSuite(blueprint.testSuites[0]);
+                setShowSimulation(true);
+              }}
+            >
+              <Play className="h-4 w-4 mr-2" />
+              Run Simulation
             </Button>
           </div>
+
+          {/* Simulation Runner */}
+          {showSimulation && selectedSuite && (
+            <div className="mt-6 pt-6 border-t border-border">
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="text-lg font-semibold text-foreground">Live Simulation</h4>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setShowSimulation(false)}
+                >
+                  Close
+                </Button>
+              </div>
+              <SimulationRunner
+                agentName={agentName}
+                testSuiteId={selectedSuite.id}
+                testSuiteName={selectedSuite.label}
+                simulationCount={Math.min(6, selectedSuite.simulations.length)}
+              />
+            </div>
+          )}
         </div>
       )}
     </div>
