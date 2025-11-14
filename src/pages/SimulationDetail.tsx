@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SimulationVisualizer } from "@/components/SimulationVisualizer";
+import { ExecutionTimeline } from "@/components/ExecutionTimeline";
 import { 
   CheckCircle2, 
   XCircle, 
@@ -22,6 +23,7 @@ const SimulationDetail = () => {
   
   const [loading, setLoading] = useState(true);
   const [activeStep, setActiveStep] = useState(0);
+  const [currentPhase, setCurrentPhase] = useState<"searching" | "evaluating" | "selecting" | "interacting">("searching");
 
   useEffect(() => {
     // Simulate loading sequence
@@ -75,39 +77,6 @@ const SimulationDetail = () => {
     { icon: Cpu, text: "Selecting target agent..." },
     { icon: Network, text: "Constructing interaction graph..." },
     { icon: PlayCircle, text: "Executing prompt..." },
-  ];
-
-  const timelineSteps = [
-    {
-      title: "User Prompt",
-      icon: MessageSquare,
-      description: scenario.prompt,
-      timestamp: "0ms"
-    },
-    {
-      title: "Agent Processing",
-      icon: Cpu,
-      description: "Agent analyzes request and determines required actions",
-      timestamp: "45ms"
-    },
-    {
-      title: "API Calls",
-      icon: Network,
-      description: "Agent queries inventory, pricing, and delivery APIs",
-      timestamp: "120ms"
-    },
-    {
-      title: "Decision Making",
-      icon: Cpu,
-      description: "Agent evaluates options against constraints",
-      timestamp: "180ms"
-    },
-    {
-      title: "Response Generated",
-      icon: MessageSquare,
-      description: scenario.response,
-      timestamp: "210ms"
-    }
   ];
 
   if (loading) {
@@ -197,42 +166,10 @@ const SimulationDetail = () => {
       </div>
 
       {/* Agent Interaction Visualization */}
-      <SimulationVisualizer scenario={scenario} />
+      <SimulationVisualizer scenario={scenario} onPhaseChange={setCurrentPhase} />
 
-      {/* Timeline Playback */}
-      <Card className="p-8 mb-6">
-        <h2 className="text-lg font-semibold text-foreground mb-6">Execution Timeline</h2>
-        
-        <div className="relative">
-          {/* Timeline line */}
-          <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-border" />
-          
-          {/* Timeline steps */}
-          <div className="space-y-6">
-            {timelineSteps.map((step, idx) => {
-              const Icon = step.icon;
-              return (
-                <div key={idx} className="relative flex gap-6 group">
-                  <div className="relative z-10">
-                    <div className="w-12 h-12 rounded-full bg-card border-2 border-primary flex items-center justify-center">
-                      <Icon className="h-5 w-5 text-primary" />
-                    </div>
-                  </div>
-                  <div className="flex-1 pt-2">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-sm font-semibold text-foreground">{step.title}</h3>
-                      <span className="text-xs text-muted-foreground font-mono">{step.timestamp}</span>
-                    </div>
-                    <div className="bg-muted/30 rounded-lg p-3 border border-border group-hover:bg-muted/50 transition-colors">
-                      <p className="text-sm text-foreground">{step.description}</p>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </Card>
+      {/* Execution Timeline */}
+      <ExecutionTimeline currentPhase={currentPhase} />
 
       {/* Summary + Improvements */}
       <Card className="p-8">
