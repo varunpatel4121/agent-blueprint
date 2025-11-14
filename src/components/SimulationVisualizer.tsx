@@ -7,39 +7,33 @@ interface Agent {
   role: string;
   x: number;
   y: number;
-  vx: number;
-  vy: number;
   radius: number;
   color: string;
   brightness: number;
-  isTarget: boolean;
-  relevanceScore: number;
+  isSelected: boolean;
+  evaluationProgress: number;
 }
 
 interface Message {
-  x: number;
-  y: number;
   progress: number;
-  fromAgent: Agent;
-  toAgent: Agent;
+  direction: "outgoing" | "incoming";
 }
 
-interface ScanBeam {
-  angle: number;
+interface ScanWave {
+  radius: number;
   opacity: number;
-  targetId: string;
 }
 
 export const SimulationVisualizer = ({ scenario }: { scenario: any }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [hoveredAgent, setHoveredAgent] = useState<Agent | null>(null);
-  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
+  const [phaseLabel, setPhaseLabel] = useState("Initializing...");
   const animationRef = useRef<number>();
   const agentsRef = useRef<Agent[]>([]);
   const messagesRef = useRef<Message[]>([]);
-  const scanBeamsRef = useRef<ScanBeam[]>([]);
-  const phaseRef = useRef<"entering" | "scanning" | "selecting" | "connected">("entering");
+  const scanWavesRef = useRef<ScanWave[]>([]);
+  const phaseRef = useRef<"searching" | "evaluating" | "selecting" | "interacting">("searching");
   const timeRef = useRef(0);
+  const selectionLineProgressRef = useRef(0);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -58,337 +52,298 @@ export const SimulationVisualizer = ({ scenario }: { scenario: any }) => {
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
 
-    // Initialize agents
-    const centerX = canvas.width / window.devicePixelRatio / 2;
-    const centerY = canvas.height / window.devicePixelRatio / 2;
+    // Fixed node positions
+    const w = canvas.width / window.devicePixelRatio;
+    const h = canvas.height / window.devicePixelRatio;
+    const centerX = w / 2;
+    const centerY = h / 2;
 
-    // Test Agent (starts center)
+    // Test Agent (center, larger)
     const testAgent: Agent = {
       id: "test",
-      name: "Test Agent",
-      role: "Shopify Assistant",
+      name: "Shopify Assistant",
+      role: "Test Agent",
       x: centerX,
       y: centerY,
-      vx: 0,
-      vy: 0,
-      radius: 40,
+      radius: 45,
       color: "hsl(195, 100%, 50%)",
-      brightness: 0,
-      isTarget: false,
-      relevanceScore: 0,
+      brightness: 1,
+      isSelected: false,
+      evaluationProgress: 0,
     };
 
-    // Target agents (orbit around center)
+    // Target agents (fixed positions around center)
     const targetAgents: Agent[] = [
       {
         id: "inventory",
-        name: "Inventory API",
+        name: "Inventory API Agent",
         role: "Stock Management",
-        x: centerX + 200,
-        y: centerY - 100,
-        vx: 0,
-        vy: 0,
-        radius: 35,
-        color: "hsl(142, 76%, 45%)",
-        brightness: 0,
-        isTarget: true,
-        relevanceScore: 0.9,
+        x: centerX + 220,
+        y: centerY - 80,
+        radius: 32,
+        color: "hsl(195, 80%, 55%)",
+        brightness: 0.3,
+        isSelected: true,
+        evaluationProgress: 0,
       },
       {
         id: "pricing",
-        name: "Pricing API",
+        name: "Pricing API Agent",
         role: "Price Calculator",
-        x: centerX - 180,
-        y: centerY + 80,
-        vx: 0,
-        vy: 0,
-        radius: 30,
-        color: "hsl(270, 75%, 65%)",
-        brightness: 0,
-        isTarget: true,
-        relevanceScore: 0.6,
+        x: centerX - 200,
+        y: centerY + 100,
+        radius: 32,
+        color: "hsl(195, 80%, 55%)",
+        brightness: 0.3,
+        isSelected: false,
+        evaluationProgress: 0,
       },
       {
         id: "delivery",
-        name: "Delivery API",
+        name: "Delivery API Agent",
         role: "Shipping Options",
-        x: centerX + 150,
-        y: centerY + 120,
-        vx: 0,
-        vy: 0,
-        radius: 30,
-        color: "hsl(25, 95%, 53%)",
-        brightness: 0,
-        isTarget: true,
-        relevanceScore: 0.7,
+        x: centerX + 180,
+        y: centerY + 130,
+        radius: 32,
+        color: "hsl(195, 80%, 55%)",
+        brightness: 0.3,
+        isSelected: false,
+        evaluationProgress: 0,
       },
       {
         id: "catalog",
-        name: "Catalog API",
+        name: "Catalog API Agent",
         role: "Product Search",
-        x: centerX - 200,
-        y: centerY - 80,
-        vx: 0,
-        vy: 0,
-        radius: 28,
-        color: "hsl(264, 80%, 60%)",
-        brightness: 0,
-        isTarget: true,
-        relevanceScore: 0.4,
+        x: centerX - 220,
+        y: centerY - 100,
+        radius: 32,
+        color: "hsl(195, 80%, 55%)",
+        brightness: 0.3,
+        isSelected: false,
+        evaluationProgress: 0,
       },
     ];
 
     agentsRef.current = [testAgent, ...targetAgents];
 
-    // Mouse interaction
-    const handleMouseMove = (e: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
+    // Animation phase timeline
+    const timeline = [
+      { time: 0, phase: "searching" as const, label: "Searching..." },
+      { time: 1500, phase: "evaluating" as const, label: "Evaluating agents..." },
+      { time: 3000, phase: "selecting" as const, label: "Selecting Inventory API Agent..." },
+      { time: 4000, phase: "interacting" as const, label: "Exchanging messages..." },
+    ];
 
-      let found = false;
-      for (const agent of agentsRef.current) {
-        const dx = x - agent.x;
-        const dy = y - agent.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        
-        if (distance < agent.radius) {
-          setHoveredAgent(agent);
-          found = true;
-          break;
-        }
-      }
-      if (!found) setHoveredAgent(null);
-    };
-
-    const handleClick = (e: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-
-      for (const agent of agentsRef.current) {
-        const dx = x - agent.x;
-        const dy = y - agent.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        
-        if (distance < agent.radius) {
-          setSelectedAgent(agent);
-          break;
-        }
-      }
-    };
-
-    canvas.addEventListener("mousemove", handleMouseMove);
-    canvas.addEventListener("click", handleClick);
-
-    // Animation phases
-    setTimeout(() => {
-      phaseRef.current = "scanning";
-      // Create scan beams
-      targetAgents.forEach((agent, idx) => {
-        setTimeout(() => {
-          scanBeamsRef.current.push({
-            angle: Math.atan2(agent.y - testAgent.y, agent.x - testAgent.x),
-            opacity: 1,
-            targetId: agent.id,
-          });
-        }, idx * 300);
-      });
-    }, 1000);
-
-    setTimeout(() => {
-      phaseRef.current = "selecting";
-    }, 3000);
-
-    setTimeout(() => {
-      phaseRef.current = "connected";
-      // Start message flow
-      const createMessage = () => {
-        const mostRelevant = targetAgents.reduce((prev, curr) => 
-          curr.relevanceScore > prev.relevanceScore ? curr : prev
-        );
-        messagesRef.current.push({
-          x: testAgent.x,
-          y: testAgent.y,
-          progress: 0,
-          fromAgent: testAgent,
-          toAgent: mostRelevant,
-        });
-      };
-      
-      createMessage();
-      setInterval(createMessage, 1500);
-    }, 4000);
+    timeline.forEach(({ time, phase, label }) => {
+      setTimeout(() => {
+        phaseRef.current = phase;
+        setPhaseLabel(label);
+      }, time);
+    });
 
     // Animation loop
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       timeRef.current += 0.016;
 
-      const centerX = canvas.width / window.devicePixelRatio / 2;
-      const centerY = canvas.height / window.devicePixelRatio / 2;
+      const testAgent = agentsRef.current[0];
+      const selectedAgent = agentsRef.current.find(a => a.isSelected);
 
-      // Update agent positions (orbital drift)
-      agentsRef.current.forEach((agent) => {
-        if (agent.isTarget && phaseRef.current !== "connected") {
-          const dx = agent.x - centerX;
-          const dy = agent.y - centerY;
-          const angle = Math.atan2(dy, dx);
-          const distance = Math.sqrt(dx * dx + dy * dy);
-          
-          // Orbital motion
-          const orbitSpeed = 0.0003;
-          const newAngle = angle + orbitSpeed;
-          agent.x = centerX + Math.cos(newAngle) * distance;
-          agent.y = centerY + Math.sin(newAngle) * distance;
-          
-          // Add gentle floating
-          agent.y += Math.sin(timeRef.current + agent.id.length) * 0.3;
-          agent.x += Math.cos(timeRef.current * 0.7 + agent.id.length) * 0.2;
+      // Phase 1: Searching (0-1.5s) - Scanning waves
+      if (phaseRef.current === "searching") {
+        // Emit scanning waves from test agent
+        if (Math.random() < 0.05) {
+          scanWavesRef.current.push({ radius: 0, opacity: 1 });
         }
 
-        // Test agent breathing
-        if (agent.id === "test") {
-          agent.brightness = 0.5 + Math.sin(timeRef.current * 2) * 0.3;
-        }
+        scanWavesRef.current = scanWavesRef.current.filter((wave) => {
+          wave.radius += 4;
+          wave.opacity *= 0.96;
 
-        // Brightness during scanning
-        if (phaseRef.current === "scanning") {
-          const beam = scanBeamsRef.current.find(b => b.targetId === agent.id);
-          if (beam && agent.isTarget) {
-            agent.brightness = 0.3 + Math.sin(timeRef.current * 5) * 0.7;
-          }
-        }
+          if (wave.opacity < 0.05) return false;
 
-        // Brightness during selection
-        if (phaseRef.current === "selecting" || phaseRef.current === "connected") {
-          if (agent.isTarget) {
-            agent.brightness = agent.relevanceScore;
-          }
-        }
-      });
-
-      // Draw scan beams
-      if (phaseRef.current === "scanning") {
-        const testAgent = agentsRef.current[0];
-        scanBeamsRef.current.forEach((beam) => {
-          const target = agentsRef.current.find(a => a.id === beam.targetId);
-          if (!target) return;
-
-          const gradient = ctx.createLinearGradient(testAgent.x, testAgent.y, target.x, target.y);
-          gradient.addColorStop(0, `hsla(195, 100%, 50%, ${beam.opacity * 0.6})`);
-          gradient.addColorStop(1, `hsla(195, 100%, 50%, 0)`);
-
-          ctx.strokeStyle = gradient;
+          // Draw wave
+          ctx.strokeStyle = `hsla(195, 100%, 60%, ${wave.opacity * 0.4})`;
           ctx.lineWidth = 2;
           ctx.beginPath();
-          ctx.moveTo(testAgent.x, testAgent.y);
-          ctx.lineTo(target.x, target.y);
+          ctx.arc(testAgent.x, testAgent.y, wave.radius, 0, Math.PI * 2);
           ctx.stroke();
 
-          // Pulsing circle at beam end
-          ctx.fillStyle = `hsla(195, 100%, 50%, ${beam.opacity * 0.3})`;
-          ctx.beginPath();
-          ctx.arc(target.x, target.y, target.radius + 10, 0, Math.PI * 2);
-          ctx.fill();
+          // Check if wave hits target agents
+          agentsRef.current.forEach((agent) => {
+            if (agent.id !== "test") {
+              const dist = Math.sqrt((agent.x - testAgent.x) ** 2 + (agent.y - testAgent.y) ** 2);
+              if (Math.abs(dist - wave.radius) < 10) {
+                agent.brightness = Math.min(agent.brightness + 0.1, 0.7);
+              }
+            }
+          });
 
-          beam.opacity *= 0.98;
+          return true;
         });
       }
 
-      // Draw connection to most relevant agent
-      if (phaseRef.current === "connected") {
-        const testAgent = agentsRef.current[0];
-        const mostRelevant = agentsRef.current.find(a => a.id === "inventory");
-        
-        if (mostRelevant) {
-          // Animated connection line
-          const pulse = Math.sin(timeRef.current * 3) * 0.5 + 0.5;
-          const gradient = ctx.createLinearGradient(testAgent.x, testAgent.y, mostRelevant.x, mostRelevant.y);
-          gradient.addColorStop(0, `hsla(142, 76%, 45%, ${0.6 + pulse * 0.4})`);
-          gradient.addColorStop(0.5, `hsla(195, 100%, 50%, ${0.4 + pulse * 0.4})`);
-          gradient.addColorStop(1, `hsla(142, 76%, 45%, ${0.6 + pulse * 0.4})`);
+      // Phase 2: Evaluating (1.5-3s) - Lines to candidates
+      if (phaseRef.current === "evaluating") {
+        agentsRef.current.forEach((agent) => {
+          if (agent.id === "test") return;
 
-          ctx.strokeStyle = gradient;
-          ctx.lineWidth = 3;
+          // Increase evaluation progress
+          agent.evaluationProgress = Math.min(agent.evaluationProgress + 0.008, 1);
+
+          // Draw evaluation line
+          const lineProgress = agent.evaluationProgress;
+          const endX = testAgent.x + (agent.x - testAgent.x) * lineProgress;
+          const endY = testAgent.y + (agent.y - testAgent.y) * lineProgress;
+
+          const pulse = Math.sin(timeRef.current * 4 + agent.id.length) * 0.3 + 0.7;
+          ctx.strokeStyle = `hsla(195, 80%, 60%, ${pulse * 0.3})`;
+          ctx.lineWidth = 1.5;
+          ctx.setLineDash([4, 4]);
           ctx.beginPath();
           ctx.moveTo(testAgent.x, testAgent.y);
-          ctx.lineTo(mostRelevant.x, mostRelevant.y);
+          ctx.lineTo(endX, endY);
           ctx.stroke();
+          ctx.setLineDash([]);
 
-          // Dim other agents
-          agentsRef.current.forEach((agent) => {
-            if (agent.isTarget && agent.id !== "inventory") {
-              agent.brightness *= 0.95;
-              agent.brightness = Math.max(agent.brightness, 0.1);
-            }
-          });
+          // Selected agent brightens more
+          if (agent.isSelected) {
+            agent.brightness = Math.min(agent.brightness + 0.02, 1);
+          } else {
+            agent.brightness = Math.max(agent.brightness - 0.01, 0.2);
+          }
+        });
+      }
+
+      // Phase 3: Selecting (3-4s) - Bright line to selected
+      if (phaseRef.current === "selecting" && selectedAgent) {
+        selectionLineProgressRef.current = Math.min(selectionLineProgressRef.current + 0.03, 1);
+        const progress = selectionLineProgressRef.current;
+
+        // Dim non-selected agents
+        agentsRef.current.forEach((agent) => {
+          if (agent.id !== "test" && !agent.isSelected) {
+            agent.brightness = Math.max(agent.brightness - 0.02, 0.15);
+          }
+        });
+
+        // Brighten selected agent
+        selectedAgent.brightness = Math.min(selectedAgent.brightness + 0.03, 1);
+
+        // Draw bright selection line
+        const endX = testAgent.x + (selectedAgent.x - testAgent.x) * progress;
+        const endY = testAgent.y + (selectedAgent.y - testAgent.y) * progress;
+
+        const pulse = Math.sin(timeRef.current * 5) * 0.2 + 0.8;
+        const gradient = ctx.createLinearGradient(testAgent.x, testAgent.y, endX, endY);
+        gradient.addColorStop(0, `hsla(195, 100%, 60%, ${pulse})`);
+        gradient.addColorStop(0.5, `hsla(142, 76%, 50%, ${pulse * 0.8})`);
+        gradient.addColorStop(1, `hsla(195, 100%, 60%, ${pulse})`);
+
+        ctx.strokeStyle = gradient;
+        ctx.lineWidth = 3;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = "hsla(195, 100%, 60%, 0.5)";
+        ctx.beginPath();
+        ctx.moveTo(testAgent.x, testAgent.y);
+        ctx.lineTo(endX, endY);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        // Draw selection label if line is complete
+        if (progress > 0.9) {
+          const midX = (testAgent.x + selectedAgent.x) / 2;
+          const midY = (testAgent.y + selectedAgent.y) / 2 - 20;
+
+          ctx.fillStyle = "hsla(220, 28%, 12%, 0.9)";
+          ctx.font = "600 12px system-ui, -apple-system, sans-serif";
+          ctx.textAlign = "center";
+          const label = `Selected: ${selectedAgent.name}`;
+          const metrics = ctx.measureText(label);
+          const padding = 8;
+          ctx.fillRect(
+            midX - metrics.width / 2 - padding,
+            midY - 10,
+            metrics.width + padding * 2,
+            20
+          );
+
+          ctx.fillStyle = "hsl(195, 100%, 60%)";
+          ctx.fillText(label, midX, midY + 4);
         }
       }
 
-      // Update and draw messages
-      messagesRef.current = messagesRef.current.filter((msg) => {
-        msg.progress += 0.02;
-        
-        if (msg.progress >= 1) {
-          // Create return message
-          if (msg.fromAgent.id === "test") {
-            messagesRef.current.push({
-              x: msg.toAgent.x,
-              y: msg.toAgent.y,
-              progress: 0,
-              fromAgent: msg.toAgent,
-              toAgent: msg.fromAgent,
-            });
-          }
-          return false;
+      // Phase 4: Interacting (4-5s) - Message packets
+      if (phaseRef.current === "interacting" && selectedAgent) {
+        // Create new messages periodically
+        if (messagesRef.current.length < 3 && Math.random() < 0.03) {
+          const direction = messagesRef.current.length % 2 === 0 ? "outgoing" : "incoming";
+          messagesRef.current.push({ progress: 0, direction });
         }
 
-        const x = msg.fromAgent.x + (msg.toAgent.x - msg.fromAgent.x) * msg.progress;
-        const y = msg.fromAgent.y + (msg.toAgent.y - msg.fromAgent.y) * msg.progress;
-
-        // Draw message particle
-        const isFromTest = msg.fromAgent.id === "test";
-        const color = isFromTest ? "hsl(195, 100%, 50%)" : "hsl(142, 76%, 45%)";
-        
-        // Glow
-        ctx.fillStyle = `${color.replace(")", ", 0.2)")}`;
+        // Draw connection line
+        const pulse = Math.sin(timeRef.current * 3) * 0.3 + 0.7;
+        ctx.strokeStyle = `hsla(195, 90%, 60%, ${pulse * 0.5})`;
+        ctx.lineWidth = 2;
+        ctx.setLineDash([6, 3]);
         ctx.beginPath();
-        ctx.arc(x, y, 8, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.moveTo(testAgent.x, testAgent.y);
+        ctx.lineTo(selectedAgent.x, selectedAgent.y);
+        ctx.stroke();
+        ctx.setLineDash([]);
 
-        // Core
-        ctx.fillStyle = color;
-        ctx.beginPath();
-        ctx.arc(x, y, 4, 0, Math.PI * 2);
-        ctx.fill();
+        // Update and draw messages
+        messagesRef.current = messagesRef.current.filter((msg) => {
+          msg.progress += 0.015;
+          if (msg.progress > 1) return false;
 
-        // Trail
-        for (let i = 0; i < 3; i++) {
-          const trailProgress = msg.progress - (i + 1) * 0.05;
-          if (trailProgress > 0) {
-            const tx = msg.fromAgent.x + (msg.toAgent.x - msg.fromAgent.x) * trailProgress;
-            const ty = msg.fromAgent.y + (msg.toAgent.y - msg.fromAgent.y) * trailProgress;
-            ctx.fillStyle = `${color.replace(")", `, ${0.3 - i * 0.1})`)}`;
-            ctx.beginPath();
-            ctx.arc(tx, ty, 3 - i, 0, Math.PI * 2);
-            ctx.fill();
-          }
-        }
+          const isOutgoing = msg.direction === "outgoing";
+          const startX = isOutgoing ? testAgent.x : selectedAgent.x;
+          const startY = isOutgoing ? testAgent.y : selectedAgent.y;
+          const endX = isOutgoing ? selectedAgent.x : testAgent.x;
+          const endY = isOutgoing ? selectedAgent.y : testAgent.y;
 
-        return true;
-      });
+          const x = startX + (endX - startX) * msg.progress;
+          const y = startY + (endY - startY) * msg.progress;
 
-      // Draw agents
+          const color = isOutgoing ? "hsl(195, 100%, 60%)" : "hsl(142, 76%, 50%)";
+
+          // Glow
+          ctx.fillStyle = color.replace(")", ", 0.3)");
+          ctx.beginPath();
+          ctx.arc(x, y, 7, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Core
+          ctx.fillStyle = color;
+          ctx.beginPath();
+          ctx.arc(x, y, 3.5, 0, Math.PI * 2);
+          ctx.fill();
+
+          return true;
+        });
+      }
+
+      // Draw all agents
       agentsRef.current.forEach((agent) => {
-        const isHovered = hoveredAgent?.id === agent.id;
-        const scale = isHovered ? 1.1 : 1;
-        const radius = agent.radius * scale;
+        const isTest = agent.id === "test";
+        
+        // Subtle idle pulse for all agents
+        const idlePulse = Math.sin(timeRef.current * 2 + agent.id.length) * 0.05 + 0.95;
+        const displayRadius = agent.radius * idlePulse;
 
         // Outer glow
-        const glowSize = radius + 20 * agent.brightness;
-        const gradient = ctx.createRadialGradient(agent.x, agent.y, radius, agent.x, agent.y, glowSize);
-        gradient.addColorStop(0, agent.color.replace(")", `, ${agent.brightness * 0.4})`));
+        const glowIntensity = isTest ? 0.6 : agent.brightness;
+        const glowSize = displayRadius + 15 * glowIntensity;
+        const gradient = ctx.createRadialGradient(
+          agent.x,
+          agent.y,
+          displayRadius * 0.5,
+          agent.x,
+          agent.y,
+          glowSize
+        );
+        gradient.addColorStop(0, agent.color.replace(")", `, ${glowIntensity * 0.4})`));
         gradient.addColorStop(1, agent.color.replace(")", ", 0)"));
         ctx.fillStyle = gradient;
         ctx.beginPath();
@@ -397,44 +352,45 @@ export const SimulationVisualizer = ({ scenario }: { scenario: any }) => {
 
         // Main circle
         ctx.fillStyle = agent.color;
+        ctx.globalAlpha = 0.9;
         ctx.beginPath();
-        ctx.arc(agent.x, agent.y, radius, 0, Math.PI * 2);
+        ctx.arc(agent.x, agent.y, displayRadius, 0, Math.PI * 2);
         ctx.fill();
+        ctx.globalAlpha = 1;
 
         // Inner highlight
         const highlightGradient = ctx.createRadialGradient(
-          agent.x - radius * 0.3,
-          agent.y - radius * 0.3,
+          agent.x - displayRadius * 0.35,
+          agent.y - displayRadius * 0.35,
           0,
           agent.x,
           agent.y,
-          radius
+          displayRadius
         );
-        highlightGradient.addColorStop(0, "rgba(255, 255, 255, 0.4)");
+        highlightGradient.addColorStop(0, "rgba(255, 255, 255, 0.5)");
         highlightGradient.addColorStop(1, "rgba(255, 255, 255, 0)");
         ctx.fillStyle = highlightGradient;
         ctx.beginPath();
-        ctx.arc(agent.x, agent.y, radius, 0, Math.PI * 2);
+        ctx.arc(agent.x, agent.y, displayRadius, 0, Math.PI * 2);
         ctx.fill();
 
         // Border
-        ctx.strokeStyle = isHovered ? "rgba(255, 255, 255, 0.8)" : "rgba(255, 255, 255, 0.3)";
-        ctx.lineWidth = isHovered ? 3 : 2;
+        ctx.strokeStyle = isTest ? "rgba(255, 255, 255, 0.6)" : "rgba(255, 255, 255, 0.3)";
+        ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.arc(agent.x, agent.y, radius, 0, Math.PI * 2);
+        ctx.arc(agent.x, agent.y, displayRadius, 0, Math.PI * 2);
         ctx.stroke();
 
-        // Label (if hovered)
-        if (isHovered) {
-          ctx.fillStyle = "hsl(220, 28%, 12%)";
-          ctx.font = "600 13px system-ui, -apple-system, sans-serif";
-          ctx.textAlign = "center";
-          ctx.fillText(agent.name, agent.x, agent.y - radius - 15);
-          
-          ctx.font = "400 11px system-ui, -apple-system, sans-serif";
-          ctx.fillStyle = "hsl(220, 15%, 45%)";
-          ctx.fillText(agent.role, agent.x, agent.y - radius - 2);
-        }
+        // Agent name label
+        ctx.fillStyle = "hsl(220, 30%, 12%)";
+        ctx.font = `${isTest ? "700" : "600"} ${isTest ? "14" : "12"}px system-ui, -apple-system, sans-serif`;
+        ctx.textAlign = "center";
+        ctx.fillText(agent.name, agent.x, agent.y - displayRadius - 12);
+
+        // Role label
+        ctx.font = "400 10px system-ui, -apple-system, sans-serif";
+        ctx.fillStyle = "hsl(220, 15%, 55%)";
+        ctx.fillText(agent.role, agent.x, agent.y - displayRadius + 2);
       });
 
       animationRef.current = requestAnimationFrame(animate);
@@ -444,74 +400,31 @@ export const SimulationVisualizer = ({ scenario }: { scenario: any }) => {
 
     return () => {
       window.removeEventListener("resize", resizeCanvas);
-      canvas.removeEventListener("mousemove", handleMouseMove);
-      canvas.removeEventListener("click", handleClick);
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [hoveredAgent]);
+  }, []);
 
   return (
     <Card className="p-8 mb-6">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold text-foreground">Agent Interaction Sandbox</h2>
-        <div className="text-xs text-muted-foreground">
-          {phaseRef.current === "entering" && "Initializing..."}
-          {phaseRef.current === "scanning" && "Scanning candidate agents..."}
-          {phaseRef.current === "selecting" && "Evaluating relevance..."}
-          {phaseRef.current === "connected" && "Active connection"}
+        <h2 className="text-lg font-semibold text-foreground">Simulation Replay</h2>
+        <div className="text-sm text-muted-foreground font-medium">
+          {phaseLabel}
         </div>
       </div>
       
-      <div className="relative rounded-lg overflow-hidden bg-gradient-to-br from-background to-muted/30 border border-border">
+      <div className="relative rounded-lg overflow-hidden bg-gradient-to-br from-background to-muted/20 border border-border">
         <canvas
           ref={canvasRef}
-          className="w-full h-[500px] cursor-pointer"
+          className="w-full h-[500px]"
           style={{ display: "block" }}
         />
-        
-        {hoveredAgent && (
-          <div className="absolute bottom-4 left-4 bg-card/95 backdrop-blur-sm border border-border rounded-lg p-4 shadow-lg">
-            <p className="text-sm font-semibold text-foreground mb-1">{hoveredAgent.name}</p>
-            <p className="text-xs text-muted-foreground mb-2">{hoveredAgent.role}</p>
-            {hoveredAgent.isTarget && (
-              <div className="text-xs text-muted-foreground">
-                Relevance: {(hoveredAgent.relevanceScore * 100).toFixed(0)}%
-              </div>
-            )}
-          </div>
-        )}
-
-        {selectedAgent && (
-          <div className="absolute top-4 right-4 bg-card/95 backdrop-blur-sm border border-border rounded-lg p-4 shadow-lg max-w-xs">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm font-semibold text-foreground">{selectedAgent.name}</p>
-              <button
-                onClick={() => setSelectedAgent(null)}
-                className="text-muted-foreground hover:text-foreground text-xs"
-              >
-                ✕
-              </button>
-            </div>
-            <p className="text-xs text-muted-foreground mb-3">{selectedAgent.role}</p>
-            <div className="space-y-2 text-xs">
-              <div className="p-2 bg-muted/50 rounded">
-                <p className="text-muted-foreground">Status: <span className="text-foreground">Active</span></p>
-              </div>
-              <div className="p-2 bg-muted/50 rounded">
-                <p className="text-muted-foreground">Messages: <span className="text-foreground">12</span></p>
-              </div>
-              <div className="p-2 bg-muted/50 rounded">
-                <p className="text-muted-foreground">Latency: <span className="text-foreground">45ms</span></p>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
       <div className="mt-4 text-xs text-muted-foreground text-center">
-        Hover over agents to see details • Click to view interaction logs
+        Automated replay of agent interaction and selection process
       </div>
     </Card>
   );
