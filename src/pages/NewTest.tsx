@@ -33,9 +33,83 @@ const NewTest = () => {
   }, [location.state]);
 
   // Mock scenario generation
-  const generateTestPlan = () => {
+  const generateTestPlan = async () => {
     setIsGenerating(true);
-    setTimeout(() => {
+
+    try {
+      // Build the prompt based on the input type
+      let prompt = `Generate 8 comprehensive test scenarios for an AI agent called "${agentName}". `;
+
+      if (inputType === "endpoint") {
+        prompt += `This agent is described as: "${description}". It will be called via POST endpoint at: ${endpoint}. `;
+        if (authHeaders) {
+          prompt += `It uses authentication headers. `;
+        }
+      } else {
+        prompt += `Here is the agent specification:\n${yamlSpec}\n\n`;
+      }
+
+      prompt += `
+Please generate 8 diverse test scenarios that cover:
+1. Core functionality testing
+2. Edge cases and error handling
+3. Security and prompt injection attempts
+4. Multi-constraint scenarios
+5. Boundary testing
+6. Real-world usage patterns
+7. Performance under complex queries
+8. Compliance with specified constraints
+
+Format the response as a JSON array where each object has:
+- id: a unique identifier like "sc-001"
+- name: a concise, descriptive title
+- description: 1-2 sentences explaining what's being tested
+- tags: array of relevant categories (e.g., ["price", "delivery", "security"])
+
+Return ONLY the JSON array, no other text.`;
+
+      // Call Claude API using fetch
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key":
+            "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", // You'll need to replace this
+          "anthropic-version": "2023-06-01",
+        },
+        body: JSON.stringify({
+          model: "claude-3-sonnet-20240229",
+          max_tokens: 2000,
+          temperature: 0.7,
+          messages: [
+            {
+              role: "user",
+              content: prompt,
+            },
+          ],
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      // Extract the text content from Claude's response
+      const content = data.content[0].text;
+
+      // Extract JSON from the response
+      const jsonMatch = content.match(/\[[\s\S]*\]/);
+      if (jsonMatch) {
+        const scenariosData = JSON.parse(jsonMatch[0]);
+        setScenarios(scenariosData);
+      } else {
+        throw new Error("Failed to parse scenarios from Claude response");
+      }
+    } catch (error) {
+      console.error("Error generating test plan:", error);
+      // Fallback to mock scenarios if API call fails
       const mockScenarios = [
         {
           id: "sc-001",
@@ -58,7 +132,8 @@ const NewTest = () => {
         {
           id: "sc-004",
           name: "Price comparison across variants",
-          description: "User asks to compare prices across product variants. Tests if agent provides accurate comparisons.",
+          description:
+            "User asks to compare prices across product variants. Tests if agent provides accurate comparisons.",
           tags: ["price", "comparison"],
         },
         {
@@ -70,7 +145,8 @@ const NewTest = () => {
         {
           id: "sc-006",
           name: "Ambiguous multi-constraint query",
-          description: "User provides conflicting requirements (fast delivery + lowest price). Tests prioritization logic.",
+          description:
+            "User provides conflicting requirements (fast delivery + lowest price). Tests prioritization logic.",
           tags: ["constraints", "ambiguity"],
         },
         {
@@ -87,8 +163,9 @@ const NewTest = () => {
         },
       ];
       setScenarios(mockScenarios);
+    } finally {
       setIsGenerating(false);
-    }, 2000);
+    }
   };
 
   const runTests = () => {
@@ -100,7 +177,7 @@ const NewTest = () => {
       description,
       scenarios,
     };
-    
+
     // Save agent to localStorage
     const agentId = `agent-${Date.now()}`;
     const newAgent = {
@@ -114,10 +191,10 @@ const NewTest = () => {
       status: "active",
       scenarios: scenarios,
     };
-    
+
     const existingAgents = JSON.parse(localStorage.getItem("agents") || "[]");
     localStorage.setItem("agents", JSON.stringify([...existingAgents, newAgent]));
-    
+
     navigate("/execution", { state: { ...testData, agentId } });
   };
 
@@ -125,9 +202,7 @@ const NewTest = () => {
     <div className="p-8 max-w-7xl mx-auto">
       <div className="mb-8">
         <h1 className="text-2xl font-semibold text-foreground mb-2">New Agent Test</h1>
-        <p className="text-sm text-muted-foreground">
-          Define your agent and generate test scenarios
-        </p>
+        <p className="text-sm text-muted-foreground">Define your agent and generate test scenarios</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -135,7 +210,7 @@ const NewTest = () => {
         <div>
           <Card className="p-6">
             <h2 className="text-lg font-semibold text-foreground mb-4">1. Define Agent</h2>
-            
+
             <Tabs defaultValue="endpoint" onValueChange={(v) => setInputType(v as "endpoint" | "spec")}>
               <TabsList className="grid w-full grid-cols-2 mb-6">
                 <TabsTrigger value="endpoint">POST Endpoint</TabsTrigger>
@@ -223,11 +298,7 @@ constraints:
               </TabsContent>
             </Tabs>
 
-            <Button 
-              onClick={generateTestPlan} 
-              disabled={!agentName || isGenerating}
-              className="w-full mt-6"
-            >
+            <Button onClick={generateTestPlan} disabled={!agentName || isGenerating} className="w-full mt-6">
               {isGenerating && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Generate Test Plan
             </Button>
@@ -238,7 +309,7 @@ constraints:
         <div>
           <Card className="p-6">
             <h2 className="text-lg font-semibold text-foreground mb-4">2. Generated Test Scenarios</h2>
-            
+
             {scenarios.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
                 <p className="text-sm">No scenarios generated yet.</p>
@@ -252,16 +323,9 @@ constraints:
 
                 <div className="space-y-3 mb-6">
                   {scenarios.map((scenario) => (
-                    <div
-                      key={scenario.id}
-                      className="p-4 border border-border rounded-lg bg-muted/30"
-                    >
-                      <h3 className="text-sm font-medium text-foreground mb-1">
-                        {scenario.name}
-                      </h3>
-                      <p className="text-xs text-muted-foreground mb-3">
-                        {scenario.description}
-                      </p>
+                    <div key={scenario.id} className="p-4 border border-border rounded-lg bg-muted/30">
+                      <h3 className="text-sm font-medium text-foreground mb-1">{scenario.name}</h3>
+                      <p className="text-xs text-muted-foreground mb-3">{scenario.description}</p>
                       <div className="flex flex-wrap gap-1">
                         {scenario.tags.map((tag: string) => (
                           <Badge key={tag} variant="outline" className="text-xs">
