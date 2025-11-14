@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -32,6 +32,7 @@ interface Agent {
   lastRun: string;
   overallScore: number;
   status: "active" | "draft" | "archived";
+  scenarios?: any[];
 }
 
 interface TestRun {
@@ -66,13 +67,35 @@ const AgentDashboard = () => {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const [timeRange, setTimeRange] = useState("7d");
+  const [agents, setAgents] = useState<Agent[]>([]);
 
-  // Mock data
-  const mockAgents: Agent[] = [];
+  // Load agents from localStorage
+  useEffect(() => {
+    const loadAgents = () => {
+      const savedAgents = localStorage.getItem("agents");
+      if (savedAgents) {
+        setAgents(JSON.parse(savedAgents));
+      }
+    };
+    
+    loadAgents();
+    
+    // Refresh when window gains focus (user navigates back to dashboard)
+    const handleFocus = () => loadAgents();
+    window.addEventListener("focus", handleFocus);
+    
+    return () => window.removeEventListener("focus", handleFocus);
+  }, []);
 
-  const mockRuns: TestRun[] = [];
+  const mockAgents: Agent[] = agents;
 
-  const mockScenarios: Scenario[] = [];
+  const mockRuns: TestRun[] = selectedAgent 
+    ? JSON.parse(localStorage.getItem("testRuns") || "[]").filter(
+        (run: any) => run.agentId === selectedAgent.id
+      )
+    : [];
+
+  const mockScenarios: Scenario[] = selectedAgent?.scenarios || [];
 
   const mockSimulations: Simulation[] = [];
 
