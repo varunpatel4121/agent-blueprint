@@ -101,7 +101,24 @@ const NewTest = () => {
       scenarios,
     };
     
-    navigate("/execution", { state: testData });
+    // Save agent to localStorage
+    const agentId = `agent-${Date.now()}`;
+    const newAgent = {
+      id: agentId,
+      name: agentName,
+      description: description,
+      type: inputType,
+      endpoint: inputType === "endpoint" ? endpoint : undefined,
+      lastRun: "Just now",
+      overallScore: 0,
+      status: "active",
+      scenarios: scenarios,
+    };
+    
+    const existingAgents = JSON.parse(localStorage.getItem("agents") || "[]");
+    localStorage.setItem("agents", JSON.stringify([...existingAgents, newAgent]));
+    
+    navigate("/execution", { state: { ...testData, agentId } });
   };
 
   return (

@@ -51,7 +51,34 @@ export default function TestExecution() {
 
     const executePhase = (index: number) => {
       if (index >= executionPhases.length) {
-        // All phases complete, navigate to results
+        // All phases complete, save run data and navigate to results
+        if (testData?.agentId) {
+          // Update agent with latest run info
+          const savedAgents = JSON.parse(localStorage.getItem("agents") || "[]");
+          const agentIndex = savedAgents.findIndex((a: any) => a.id === testData.agentId);
+          
+          if (agentIndex !== -1) {
+            savedAgents[agentIndex].lastRun = "Just now";
+            savedAgents[agentIndex].overallScore = Math.floor(Math.random() * 30) + 60; // Random score 60-90
+            localStorage.setItem("agents", JSON.stringify(savedAgents));
+          }
+
+          // Save test run
+          const runId = `run-${Date.now()}`;
+          const testRun = {
+            id: runId,
+            agentId: testData.agentId,
+            name: `Test run for ${testData.agentName}`,
+            timestamp: "Just now",
+            scenarioCount: totalScenarios,
+            overallScore: Math.floor(Math.random() * 30) + 60,
+            status: "completed",
+          };
+          
+          const existingRuns = JSON.parse(localStorage.getItem("testRuns") || "[]");
+          localStorage.setItem("testRuns", JSON.stringify([testRun, ...existingRuns]));
+        }
+
         setTimeout(() => {
           navigate("/run", { state: testData, replace: true });
         }, 500);
