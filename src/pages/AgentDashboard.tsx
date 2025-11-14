@@ -68,135 +68,13 @@ const AgentDashboard = () => {
   const [timeRange, setTimeRange] = useState("7d");
 
   // Mock data
-  const mockAgents: Agent[] = [
-    {
-      id: "agent-001",
-      name: "Shopify Assistant",
-      description: "Helps users find and purchase products",
-      type: "endpoint",
-      endpoint: "https://api.example.com/shopify-agent",
-      lastRun: "2 hours ago",
-      overallScore: 62,
-      status: "active",
-    },
-    {
-      id: "agent-002",
-      name: "Support Bot",
-      description: "Customer support and FAQ handling",
-      type: "yaml",
-      lastRun: "1 day ago",
-      overallScore: 74,
-      status: "active",
-    },
-    {
-      id: "agent-003",
-      name: "Inventory Agent",
-      description: "Real-time inventory and stock management",
-      type: "endpoint",
-      endpoint: "https://api.example.com/inventory-agent",
-      lastRun: "3 days ago",
-      overallScore: 88,
-      status: "active",
-    },
-    {
-      id: "agent-004",
-      name: "Order Processing",
-      description: "Handles order creation and fulfillment",
-      type: "yaml",
-      lastRun: "5 days ago",
-      overallScore: 45,
-      status: "draft",
-    },
-  ];
+  const mockAgents: Agent[] = [];
 
-  const mockRuns: TestRun[] = [
-    {
-      id: "run-001",
-      name: "Budget constraint test",
-      timestamp: "2 hours ago",
-      scenarioCount: 8,
-      overallScore: 62,
-      status: "completed",
-    },
-    {
-      id: "run-002",
-      name: "Full scenario suite",
-      timestamp: "1 day ago",
-      scenarioCount: 12,
-      overallScore: 68,
-      status: "completed",
-    },
-    {
-      id: "run-003",
-      name: "Security tests",
-      timestamp: "3 days ago",
-      scenarioCount: 5,
-      overallScore: 85,
-      status: "completed",
-    },
-  ];
+  const mockRuns: TestRun[] = [];
 
-  const mockScenarios: Scenario[] = [
-    {
-      id: "sc-001",
-      name: "Budget constraint with delivery preference",
-      tags: ["constraints", "delivery"],
-      runCount: 12,
-      avgScore: 65,
-    },
-    {
-      id: "sc-002",
-      name: "Out-of-stock product handling",
-      tags: ["inventory"],
-      runCount: 8,
-      avgScore: 85,
-    },
-    {
-      id: "sc-003",
-      name: "Price comparison across variants",
-      tags: ["price"],
-      runCount: 15,
-      avgScore: 90,
-    },
-    {
-      id: "sc-004",
-      name: "Prompt injection attempt",
-      tags: ["security"],
-      runCount: 20,
-      avgScore: 95,
-    },
-  ];
+  const mockScenarios: Scenario[] = [];
 
-  const mockSimulations: Simulation[] = [
-    {
-      id: "sim-001",
-      runId: "run-001",
-      scenarioName: "Budget constraint with delivery preference",
-      status: "partial",
-      score: 65,
-    },
-    {
-      id: "sim-002",
-      runId: "run-001",
-      scenarioName: "Out-of-stock product handling",
-      status: "pass",
-      score: 85,
-    },
-    {
-      id: "sim-003",
-      runId: "run-002",
-      scenarioName: "Price comparison across variants",
-      status: "pass",
-      score: 90,
-    },
-    {
-      id: "sim-004",
-      runId: "run-002",
-      scenarioName: "Prompt injection attempt",
-      status: "fail",
-      score: 40,
-    },
-  ];
+  const mockSimulations: Simulation[] = [];
 
   const filteredAgents = mockAgents.filter((agent) => {
     const matchesSearch =
