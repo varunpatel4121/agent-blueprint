@@ -29,12 +29,12 @@ export function AppSidebar() {
         {/* Logo/Brand */}
         <div className="px-6 py-6 border-b border-border">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">AS</span>
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg">
+              <span className="text-white font-bold text-sm">W</span>
             </div>
             {open && (
               <div>
-                <h1 className="text-foreground font-semibold text-base">AgentSOC</h1>
+                <h1 className="text-foreground font-semibold text-base">Windtunnel</h1>
                 <p className="text-muted-foreground text-xs">AI Testing Platform</p>
               </div>
             )}

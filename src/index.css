@@ -8,125 +8,133 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Base colors - neutral slate palette */
-    --background: 0 0% 100%;
-    --foreground: 215 25% 15%;
+    /* Base colors - clean white with subtle cool tones */
+    --background: 210 20% 98%;
+    --foreground: 220 30% 12%;
     
-    /* Card surfaces */
+    /* Card surfaces - elevated with subtle gradient feel */
     --card: 0 0% 100%;
-    --card-foreground: 215 25% 15%;
+    --card-foreground: 220 30% 12%;
     
     /* Popover surfaces */
     --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 15%;
+    --popover-foreground: 220 30% 12%;
     
-    /* Primary - electric cyan accent */
-    --primary: 189 94% 43%;
+    /* Primary - vibrant cyan/sky (wind/air theme) */
+    --primary: 195 100% 50%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 189 94% 38%;
+    --primary-hover: 195 100% 45%;
     
-    /* Secondary - subtle gray */
-    --secondary: 214 15% 96%;
-    --secondary-foreground: 215 25% 15%;
+    /* Secondary - deep tech purple */
+    --secondary: 264 80% 60%;
+    --secondary-foreground: 0 0% 100%;
     
-    /* Muted - for less prominent UI */
-    --muted: 214 15% 96%;
-    --muted-foreground: 215 15% 45%;
+    /* Muted - cool gray tones */
+    --muted: 215 20% 94%;
+    --muted-foreground: 220 15% 45%;
     
-    /* Accent - slightly darker than muted */
-    --accent: 214 20% 92%;
-    --accent-foreground: 215 25% 15%;
+    /* Accent - vibrant purple accent */
+    --accent: 270 75% 65%;
+    --accent-foreground: 0 0% 100%;
     
-    /* Destructive - red for errors/delete */
-    --destructive: 0 72% 51%;
+    /* Destructive - modern red */
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
     
-    /* Success - green for positive states */
-    --success: 142 76% 36%;
+    /* Success - vibrant green */
+    --success: 142 76% 45%;
     --success-foreground: 0 0% 100%;
     
-    /* Warning - amber for warnings */
-    --warning: 38 92% 50%;
+    /* Warning - energetic orange */
+    --warning: 25 95% 53%;
     --warning-foreground: 0 0% 100%;
     
     /* Borders and inputs */
-    --border: 214 20% 90%;
-    --input: 214 20% 90%;
-    --ring: 189 94% 43%;
+    --border: 215 20% 88%;
+    --input: 215 20% 88%;
+    --ring: 195 100% 50%;
     
-    /* Border radius */
-    --radius: 0.5rem;
+    /* Border radius - slightly more rounded for modern feel */
+    --radius: 0.75rem;
     
-    /* Sidebar specific colors */
-    --sidebar-background: 215 25% 98%;
-    --sidebar-foreground: 215 20% 30%;
-    --sidebar-primary: 189 94% 43%;
+    /* Sidebar specific colors - darker for contrast */
+    --sidebar-background: 220 30% 96%;
+    --sidebar-foreground: 220 25% 25%;
+    --sidebar-primary: 195 100% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 214 20% 92%;
-    --sidebar-accent-foreground: 215 25% 15%;
-    --sidebar-border: 214 20% 88%;
-    --sidebar-ring: 189 94% 43%;
+    --sidebar-accent: 220 20% 90%;
+    --sidebar-accent-foreground: 220 30% 12%;
+    --sidebar-border: 215 20% 85%;
+    --sidebar-ring: 195 100% 50%;
     
-    /* Transitions */
-    --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Transitions - smooth and premium */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(195 100% 50%), hsl(270 75% 65%));
+    --gradient-subtle: linear-gradient(180deg, hsl(210 20% 98%), hsl(215 20% 94%));
   }
 
   .dark {
-    /* Base colors - dark mode */
-    --background: 215 28% 9%;
+    /* Base colors - deep dark with tech undertones */
+    --background: 220 30% 8%;
     --foreground: 0 0% 98%;
     
-    /* Card surfaces */
-    --card: 215 25% 12%;
+    /* Card surfaces - elevated dark */
+    --card: 220 28% 12%;
     --card-foreground: 0 0% 98%;
     
     /* Popover surfaces */
-    --popover: 215 25% 12%;
+    --popover: 220 28% 12%;
     --popover-foreground: 0 0% 98%;
     
-    /* Primary - electric cyan (same but adjusted for dark) */
-    --primary: 189 94% 43%;
-    --primary-foreground: 0 0% 100%;
-    --primary-hover: 189 94% 48%;
+    /* Primary - vibrant cyan (pops in dark mode) */
+    --primary: 195 100% 55%;
+    --primary-foreground: 220 30% 8%;
+    --primary-hover: 195 100% 60%;
     
-    /* Secondary */
-    --secondary: 215 25% 16%;
-    --secondary-foreground: 0 0% 98%;
+    /* Secondary - rich purple */
+    --secondary: 264 70% 55%;
+    --secondary-foreground: 0 0% 100%;
     
-    /* Muted */
-    --muted: 215 25% 16%;
-    --muted-foreground: 215 15% 65%;
+    /* Muted - subtle dark gray */
+    --muted: 220 25% 16%;
+    --muted-foreground: 220 15% 65%;
     
-    /* Accent */
-    --accent: 215 25% 18%;
-    --accent-foreground: 0 0% 98%;
+    /* Accent - glowing purple */
+    --accent: 270 70% 60%;
+    --accent-foreground: 0 0% 100%;
     
     /* Destructive */
-    --destructive: 0 72% 51%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
     
     /* Success */
-    --success: 142 76% 36%;
+    --success: 142 76% 45%;
     --success-foreground: 0 0% 100%;
     
     /* Warning */
-    --warning: 38 92% 50%;
+    --warning: 25 95% 53%;
     --warning-foreground: 0 0% 100%;
     
-    /* Borders and inputs */
-    --border: 215 25% 18%;
-    --input: 215 25% 18%;
-    --ring: 189 94% 43%;
+    /* Borders and inputs - subtle glow */
+    --border: 220 25% 18%;
+    --input: 220 25% 18%;
+    --ring: 195 100% 55%;
     
-    /* Sidebar dark mode */
-    --sidebar-background: 215 25% 10%;
+    /* Sidebar dark mode - deepest blacks */
+    --sidebar-background: 220 30% 6%;
     --sidebar-foreground: 0 0% 90%;
-    --sidebar-primary: 189 94% 43%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 215 25% 16%;
+    --sidebar-primary: 195 100% 55%;
+    --sidebar-primary-foreground: 220 30% 8%;
+    --sidebar-accent: 220 25% 14%;
     --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 215 25% 18%;
-    --sidebar-ring: 189 94% 43%;
+    --sidebar-border: 220 25% 16%;
+    --sidebar-ring: 195 100% 55%;
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(195 100% 55%), hsl(270 70% 60%));
+    --gradient-subtle: linear-gradient(180deg, hsl(220 30% 8%), hsl(220 28% 12%));
   }
 }
 
