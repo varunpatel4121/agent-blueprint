@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,15 @@ const RunResults = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const testData = location.state;
+  const [showCards, setShowCards] = useState(false);
+
+  useEffect(() => {
+    // Trigger card animations after a brief delay
+    const timer = setTimeout(() => {
+      setShowCards(true);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Mock results
   const mockResults = {
@@ -208,7 +217,9 @@ shipping:  # NEW: Country-specific details
 
       <div className="space-y-6">
         {/* A. Run Summary */}
-        <Card className="p-6">
+        <Card className={`p-6 transition-all duration-700 ${
+          showCards ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+        }`} style={{ transitionDelay: '100ms' }}>
           <div className="mb-4">
             <h1 className="text-xl font-semibold text-foreground mb-1">Run Results</h1>
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -242,7 +253,9 @@ shipping:  # NEW: Country-specific details
         </Card>
 
         {/* B. Scenario Results */}
-        <Card className="p-6">
+        <Card className={`p-6 transition-all duration-700 ${
+          showCards ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+        }`} style={{ transitionDelay: '400ms' }}>
           <h2 className="text-lg font-semibold text-foreground mb-4">Scenario Results</h2>
           
           <div className="space-y-2">
@@ -272,7 +285,9 @@ shipping:  # NEW: Country-specific details
         </Card>
 
         {/* C. Improvement Suggestions */}
-        <Card className="p-6">
+        <Card className={`p-6 transition-all duration-700 ${
+          showCards ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+        }`} style={{ transitionDelay: '700ms' }}>
           <h2 className="text-lg font-semibold text-foreground mb-2">3. Suggested Spec Improvements</h2>
           <p className="text-sm text-muted-foreground mb-4">
             Based on the failures, here's how you can improve your agent spec:
