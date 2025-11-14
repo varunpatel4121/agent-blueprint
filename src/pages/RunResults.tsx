@@ -25,29 +25,15 @@ const RunResults = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Mock results
-  const mockResults = {
-    overallScore: 62,
-    breakdown: {
-      functionalCorrectness: 70,
-      constraintAdherence: 50,
-      robustness: 55,
-    },
-    runTime: new Date().toLocaleString(),
-    scenarioResults: [
-      {
-        id: "sc-001",
-        name: "Budget constraint with delivery preference",
-        status: "partial",
-        type: "constraints",
-        score: 65,
-        prompt: "I need headphones under $100 with 2-day delivery",
-        response: "I found the XR-2000 wireless headphones for $89.99. Standard shipping is 5-7 days, or you can upgrade to express for $15.",
-        expected: ["Identify both budget and delivery constraints", "Filter products by 2-day delivery availability", "Return only options meeting both criteria"],
-        why: ["Successfully found product within budget constraint", "Failed to filter by 2-day delivery requirement upfront", "Required user to manually check delivery upgrade options"],
-        impact: "Forces users to do extra work checking delivery options, reducing conversion and creating friction in the purchase flow.",
-        suggestions: [
-          "Add delivery time as a primary filter in product search",
+  // Use real test results if available, otherwise use mock data
+  const scenarioResults = testData?.testResults || [];
+  const summary = testData?.summary || {
+    overallScore: 0,
+    totalTests: 0,
+    passed: 0,
+    failed: 0,
+    partial: 0,
+  };
           "Query only items with 2-day delivery already enabled",
           "Surface delivery constraints earlier in the search logic",
           "Provide clear indication when constraints conflict with available inventory"

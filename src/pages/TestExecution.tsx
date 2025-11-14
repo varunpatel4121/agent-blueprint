@@ -11,6 +11,8 @@ import {
   Target,
   MessageSquare 
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 interface ExecutionPhase {
   id: string;
@@ -45,43 +47,83 @@ export default function TestExecution() {
       return;
     }
 
-    // Simulate execution phases
+    // Execute tests
     let phaseTimer: NodeJS.Timeout;
     let progressTimer: NodeJS.Timeout;
 
-    const executePhase = (index: number) => {
+    const executePhase = async (index: number) => {
       if (index >= executionPhases.length) {
-        // All phases complete, save run data and navigate to results
-        if (testData?.agentId) {
-          // Update agent with latest run info
-          const savedAgents = JSON.parse(localStorage.getItem("agents") || "[]");
-          const agentIndex = savedAgents.findIndex((a: any) => a.id === testData.agentId);
-          
-          if (agentIndex !== -1) {
-            savedAgents[agentIndex].lastRun = "Just now";
-            savedAgents[agentIndex].overallScore = Math.floor(Math.random() * 30) + 60; // Random score 60-90
-            localStorage.setItem("agents", JSON.stringify(savedAgents));
+        // All phases complete, run actual tests and navigate to results
+        try {
+          const { data, error } = await supabase.functions.invoke('run-agent-tests', {
+            body: {
+              agentName: testData.agentName,
+              endpoint: testData.endpoint,
+              description: testData.description,
+              yamlSpec: testData.yamlSpec,
+              inputType: testData.inputType,
+              scenarios: testData.scenarios,
+            }
+          });
+
+          if (error) {
+            console.error("Error running tests:", error);
+            toast({
+              title: "Test execution failed",
+              description: "Failed to run tests. Please try again.",
+              variant: "destructive",
+            });
+            navigate("/new");
+            return;
           }
 
-          // Save test run
-          const runId = `run-${Date.now()}`;
-          const testRun = {
-            id: runId,
-            agentId: testData.agentId,
-            name: `Test run for ${testData.agentName}`,
-            timestamp: "Just now",
-            scenarioCount: totalScenarios,
-            overallScore: Math.floor(Math.random() * 30) + 60,
-            status: "completed",
-          };
-          
-          const existingRuns = JSON.parse(localStorage.getItem("testRuns") || "[]");
-          localStorage.setItem("testRuns", JSON.stringify([testRun, ...existingRuns]));
-        }
+          console.log("Test results:", data);
+          if (testData?.agentId) {
+            // Update agent with latest run info
+            const savedAgents = JSON.parse(localStorage.getItem("agents") || "[]");
+            const agentIndex = savedAgents.findIndex((a: any) => a.id === testData.agentId);
+            
+            if (agentIndex !== -1) {
+              savedAgents[agentIndex].lastRun = "Just now";
+              savedAgents[agentIndex].overallScore = data.summary.overallScore;
+              localStorage.setItem("agents", JSON.stringify(savedAgents));
+            }
 
-        setTimeout(() => {
-          navigate("/run", { state: testData, replace: true });
-        }, 500);
+            // Save test run
+            const runId = `run-${Date.now()}`;
+            const testRun = {
+              id: runId,
+              agentId: testData.agentId,
+              name: `Test run for ${testData.agentName}`,
+              timestamp: "Just now",
+              scenarioCount: totalScenarios,
+              overallScore: data.summary.overallScore,
+              status: "completed",
+            };
+            
+            const existingRuns = JSON.parse(localStorage.getItem("testRuns") || "[]");
+            localStorage.setItem("testRuns", JSON.stringify([testRun, ...existingRuns]));
+          }
+
+          setTimeout(() => {
+            navigate("/run", { 
+              state: { 
+                ...testData, 
+                testResults: data.results,
+                summary: data.summary 
+              }, 
+              replace: true 
+            });
+          }, 500);
+        } catch (err) {
+          console.error("Error in test execution:", err);
+          toast({
+            title: "Test execution failed",
+            description: "An unexpected error occurred.",
+            variant: "destructive",
+          });
+          navigate("/new");
+        }
         return;
       }
 
