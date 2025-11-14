@@ -21,6 +21,7 @@ import {
   CheckCircle2,
   XCircle,
   AlertCircle,
+  Archive,
 } from "lucide-react";
 
 interface Agent {
@@ -86,6 +87,23 @@ const AgentDashboard = () => {
     
     return () => window.removeEventListener("focus", handleFocus);
   }, []);
+
+  const toggleArchiveAgent = (agentId: string) => {
+    const savedAgents = JSON.parse(localStorage.getItem("agents") || "[]");
+    const agentIndex = savedAgents.findIndex((a: any) => a.id === agentId);
+    
+    if (agentIndex !== -1) {
+      const currentStatus = savedAgents[agentIndex].status;
+      savedAgents[agentIndex].status = currentStatus === "archived" ? "active" : "archived";
+      localStorage.setItem("agents", JSON.stringify(savedAgents));
+      setAgents(savedAgents);
+      
+      // Update selected agent
+      if (selectedAgent?.id === agentId) {
+        setSelectedAgent(savedAgents[agentIndex]);
+      }
+    }
+  };
 
   const mockAgents: Agent[] = agents;
 
@@ -217,10 +235,18 @@ const AgentDashboard = () => {
                     selectedAgent?.id === agent.id
                       ? "border-primary bg-primary/5"
                       : "border-border hover:bg-muted/50"
-                  }`}
+                  } ${agent.status === "archived" ? "opacity-60" : ""}`}
                 >
                   <div className="flex items-start justify-between mb-2">
-                    <h3 className="text-sm font-semibold text-foreground">{agent.name}</h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-sm font-semibold text-foreground">{agent.name}</h3>
+                      {agent.status === "archived" && (
+                        <Badge variant="secondary" className="text-xs">
+                          <Archive className="h-3 w-3 mr-1" />
+                          Archived
+                        </Badge>
+                      )}
+                    </div>
                     {getScoreBadge(agent.overallScore)}
                   </div>
                   <p className="text-xs text-muted-foreground mb-3 line-clamp-1">
@@ -285,6 +311,13 @@ const AgentDashboard = () => {
                   <Button variant="outline">
                     <Edit className="h-4 w-4 mr-2" />
                     Edit Spec
+                  </Button>
+                  <Button 
+                    variant={selectedAgent.status === "archived" ? "default" : "outline"}
+                    onClick={() => toggleArchiveAgent(selectedAgent.id)}
+                  >
+                    <Archive className="h-4 w-4 mr-2" />
+                    {selectedAgent.status === "archived" ? "Unarchive" : "Archive"}
                   </Button>
                   {selectedAgent.endpoint && (
                     <Button variant="outline" size="icon">
