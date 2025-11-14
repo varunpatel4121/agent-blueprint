@@ -172,7 +172,7 @@ shipping:  # NEW: Country-specific details
   };
 
   const applySuggestions = () => {
-    navigate("/", { 
+    navigate("/new", { 
       state: { 
         prefillSpec: mockResults.suggestedSpec,
         agentName: testData?.agentName 
@@ -182,7 +182,7 @@ shipping:  # NEW: Country-specific details
 
   return (
     <div className="p-8 max-w-6xl mx-auto">
-      <Button variant="ghost" onClick={() => navigate("/")} className="mb-6">
+      <Button variant="ghost" onClick={() => navigate("/new")} className="mb-6">
         <ArrowLeft className="h-4 w-4 mr-2" />
         Back to New Test
       </Button>
