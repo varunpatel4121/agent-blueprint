@@ -234,34 +234,48 @@ const AgentDashboard = () => {
               {filteredAgents.map((agent) => (
                 <div
                   key={agent.id}
-                  onClick={() => setSelectedAgent(agent)}
-                  className={`p-4 rounded-lg border cursor-pointer transition-colors ${
+                  className={`group relative p-4 rounded-lg border cursor-pointer transition-colors ${
                     selectedAgent?.id === agent.id
                       ? "border-primary bg-primary/5"
                       : "border-border hover:bg-muted/50"
                   } ${agent.status === "archived" ? "opacity-60" : ""}`}
                 >
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-sm font-semibold text-foreground">{agent.name}</h3>
-                      {agent.status === "archived" && (
-                        <Badge variant="secondary" className="text-xs">
-                          <Archive className="h-3 w-3 mr-1" />
-                          Archived
-                        </Badge>
-                      )}
+                  <div onClick={() => setSelectedAgent(agent)}>
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-sm font-semibold text-foreground">{agent.name}</h3>
+                        {agent.status === "archived" && (
+                          <Badge variant="secondary" className="text-xs">
+                            <Archive className="h-3 w-3 mr-1" />
+                            Archived
+                          </Badge>
+                        )}
+                      </div>
+                      {getScoreBadge(agent.overallScore)}
                     </div>
-                    {getScoreBadge(agent.overallScore)}
+                    <p className="text-xs text-muted-foreground mb-3 line-clamp-1">
+                      {agent.description}
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <Badge variant="outline" className="text-xs">
+                        {agent.type === "endpoint" ? "Endpoint" : "YAML/JSON"}
+                      </Badge>
+                      <span className="text-xs text-muted-foreground">{agent.lastRun}</span>
+                    </div>
                   </div>
-                  <p className="text-xs text-muted-foreground mb-3 line-clamp-1">
-                    {agent.description}
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <Badge variant="outline" className="text-xs">
-                      {agent.type === "endpoint" ? "Endpoint" : "YAML/JSON"}
-                    </Badge>
-                    <span className="text-xs text-muted-foreground">{agent.lastRun}</span>
-                  </div>
+                  
+                  {/* Archive button on hover */}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-2 right-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleArchiveAgent(agent.id);
+                    }}
+                  >
+                    <Archive className="h-4 w-4" />
+                  </Button>
                 </div>
               ))}
             </div>
