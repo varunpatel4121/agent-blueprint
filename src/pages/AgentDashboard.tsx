@@ -493,11 +493,17 @@ const AgentDashboard = () => {
                               status: sim.status,
                               score: sim.score,
                               type: "constraints",
-                              prompt: "Sample prompt",
-                              response: "Sample response",
-                              expected: "Expected behavior",
-                              why: ["Reason 1", "Reason 2"],
-                              suggestion: "Improvement suggestion"
+                              prompt: "I need size M, can only pick up in San Francisco",
+                              response: "Size M is available. Our stores are located nationwide.",
+                              expected: ["Detect location-specific request", "Query SF store inventory specifically", "Respond with SF-scoped availability"],
+                              why: ["Missed the location cue in user request", "Returned generic nationwide inventory response", "Did not perform SF-specific availability check"],
+                              impact: "Creates misleading availability results and can cause incorrect orders or wasted customer trips to stores without stock.",
+                              suggestions: [
+                                "Add explicit location-awareness logic to parse city/store names",
+                                "Filter inventory queries by detected store or city parameter",
+                                "Include validation ensuring response matches requested location",
+                                "If location data unavailable, ask user to confirm their store preference"
+                              ]
                             }
                           }
                         })}
