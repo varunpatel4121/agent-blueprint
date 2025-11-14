@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { SimulationVisualizer } from "@/components/SimulationVisualizer";
 import { 
   CheckCircle2, 
   XCircle, 
@@ -196,106 +197,7 @@ const SimulationDetail = () => {
       </div>
 
       {/* Agent Interaction Visualization */}
-      <Card className="p-8 mb-6">
-        <h2 className="text-lg font-semibold text-foreground mb-6">Agent Interaction Flow</h2>
-        
-        <div className="relative">
-          {/* Agent Nodes */}
-          <div className="grid grid-cols-3 gap-8 mb-12">
-            {/* Test Agent */}
-            <div className="flex flex-col items-center">
-              <div className="w-24 h-24 rounded-full bg-primary/10 border-2 border-primary flex items-center justify-center mb-3">
-                <Cpu className="h-10 w-10 text-primary" />
-              </div>
-              <p className="text-sm font-medium text-foreground">Test Agent</p>
-              <p className="text-xs text-muted-foreground">Shopify Assistant</p>
-            </div>
-
-            {/* Arrow and Message */}
-            <div className="flex flex-col items-center justify-center">
-              <div className="relative w-full">
-                <svg className="w-full h-16" viewBox="0 0 100 60">
-                  <defs>
-                    <marker
-                      id="arrowhead"
-                      markerWidth="10"
-                      markerHeight="10"
-                      refX="9"
-                      refY="3"
-                      orient="auto"
-                    >
-                      <polygon
-                        points="0 0, 10 3, 0 6"
-                        className="fill-primary"
-                      />
-                    </marker>
-                  </defs>
-                  <line
-                    x1="0"
-                    y1="30"
-                    x2="100"
-                    y2="30"
-                    className={`stroke-primary ${scenario.status === "pass" ? "stroke-success" : scenario.status === "fail" ? "stroke-destructive" : "stroke-warning"}`}
-                    strokeWidth="2"
-                    markerEnd="url(#arrowhead)"
-                  />
-                </svg>
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-card border border-border rounded px-3 py-1">
-                  <p className="text-xs text-foreground whitespace-nowrap">Query → Response</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Target Agent */}
-            <div className="flex flex-col items-center">
-              <div className={`w-24 h-24 rounded-full ${
-                scenario.status === "pass" ? "bg-success/10 border-success" :
-                scenario.status === "fail" ? "bg-destructive/10 border-destructive" :
-                "bg-warning/10 border-warning"
-              } border-2 flex items-center justify-center mb-3`}>
-                <Network className={`h-10 w-10 ${
-                  scenario.status === "pass" ? "text-success" :
-                  scenario.status === "fail" ? "text-destructive" :
-                  "text-warning"
-                }`} />
-              </div>
-              <p className="text-sm font-medium text-foreground">Target Agent</p>
-              <p className="text-xs text-muted-foreground">Inventory API</p>
-            </div>
-          </div>
-
-          {/* Interaction Details */}
-          <div className="grid grid-cols-2 gap-6">
-            <div className="space-y-3">
-              <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50 border border-border">
-                <MessageSquare className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="text-xs font-medium text-muted-foreground mb-1">Prompt Sent</p>
-                  <p className="text-sm text-foreground">{scenario.prompt}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <div className={`flex items-start gap-3 p-4 rounded-lg ${
-                scenario.status === "pass" ? "bg-success/5 border-success/20" :
-                scenario.status === "fail" ? "bg-destructive/5 border-destructive/20" :
-                "bg-warning/5 border-warning/20"
-              } border`}>
-                <MessageSquare className={`h-5 w-5 mt-0.5 flex-shrink-0 ${
-                  scenario.status === "pass" ? "text-success" :
-                  scenario.status === "fail" ? "text-destructive" :
-                  "text-warning"
-                }`} />
-                <div>
-                  <p className="text-xs font-medium text-muted-foreground mb-1">Response Returned</p>
-                  <p className="text-sm text-foreground">{scenario.response}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Card>
+      <SimulationVisualizer scenario={scenario} />
 
       {/* Timeline Playback */}
       <Card className="p-8 mb-6">
