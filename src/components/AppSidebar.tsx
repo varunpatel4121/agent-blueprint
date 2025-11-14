@@ -1,4 +1,4 @@
-import { Home, Plus } from "lucide-react";
+import { Home } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import {
   Sidebar,
@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/sidebar";
 
 const navItems = [
-  { title: "New Test", url: "/new", icon: Plus },
   { title: "Dashboard", url: "/", icon: Home },
 ];
 
