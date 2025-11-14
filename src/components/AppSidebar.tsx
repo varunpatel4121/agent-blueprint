@@ -1,4 +1,4 @@
-import { LayoutDashboard, Bot, FileText, Play, BarChart3, Settings } from "lucide-react";
+import { Plus, History } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import {
   Sidebar,
@@ -12,12 +12,8 @@ import {
 } from "@/components/ui/sidebar";
 
 const navItems = [
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Agents", url: "/agents", icon: Bot },
-  { title: "Test Blueprints", url: "/blueprints", icon: FileText },
-  { title: "Simulations", url: "/simulations", icon: Play },
-  { title: "Reports", url: "/reports", icon: BarChart3 },
-  { title: "Settings", url: "/settings", icon: Settings },
+  { title: "New Test", url: "/", icon: Plus },
+  { title: "Runs", url: "/runs", icon: History },
 ];
 
 export function AppSidebar() {
@@ -35,7 +31,6 @@ export function AppSidebar() {
             {open && (
               <div>
                 <h1 className="text-foreground font-semibold text-base">Windtunnel</h1>
-                <p className="text-muted-foreground text-xs">AI Testing Platform</p>
               </div>
             )}
           </div>
