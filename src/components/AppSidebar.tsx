@@ -1,4 +1,4 @@
-import { Home, Plus, PlayCircle } from "lucide-react";
+import { Home, Plus } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import {
   Sidebar,
@@ -14,7 +14,6 @@ import {
 const navItems = [
   { title: "New Test", url: "/new", icon: Plus },
   { title: "Dashboard", url: "/", icon: Home },
-  { title: "Runs", url: "/runs", icon: PlayCircle },
 ];
 
 export function AppSidebar() {
@@ -27,7 +26,7 @@ export function AppSidebar() {
         <div className="px-6 py-6 border-b border-border">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-sm">W</span>
+              <span className="text-white font-bold text-sm">A</span>
             </div>
             {open && (
               <div>
