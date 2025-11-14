@@ -241,17 +241,16 @@ const AgentDashboard = () => {
                   } ${agent.status === "archived" ? "opacity-60" : ""}`}
                 >
                   <div onClick={() => setSelectedAgent(agent)}>
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-sm font-semibold text-foreground">{agent.name}</h3>
+                    <div className="flex items-start justify-between mb-2 pr-8">
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        <h3 className="text-sm font-semibold text-foreground truncate">{agent.name}</h3>
                         {agent.status === "archived" && (
-                          <Badge variant="secondary" className="text-xs">
+                          <Badge variant="secondary" className="text-xs flex-shrink-0">
                             <Archive className="h-3 w-3 mr-1" />
                             Archived
                           </Badge>
                         )}
                       </div>
-                      {getScoreBadge(agent.overallScore)}
                     </div>
                     <p className="text-xs text-muted-foreground mb-3 line-clamp-1">
                       {agent.description}
@@ -260,7 +259,10 @@ const AgentDashboard = () => {
                       <Badge variant="outline" className="text-xs">
                         {agent.type === "endpoint" ? "Endpoint" : "YAML/JSON"}
                       </Badge>
-                      <span className="text-xs text-muted-foreground">{agent.lastRun}</span>
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs text-muted-foreground">{agent.lastRun}</span>
+                        {getScoreBadge(agent.overallScore)}
+                      </div>
                     </div>
                   </div>
                   
