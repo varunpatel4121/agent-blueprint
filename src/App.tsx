@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppLayout } from "./components/AppLayout";
+import AgentDashboard from "./pages/AgentDashboard";
 import NewTest from "./pages/NewTest";
 import RunResults from "./pages/RunResults";
 import RunsHistory from "./pages/RunsHistory";
@@ -20,7 +21,8 @@ const App = () => (
       <BrowserRouter>
         <AppLayout>
           <Routes>
-            <Route path="/" element={<NewTest />} />
+            <Route path="/" element={<AgentDashboard />} />
+            <Route path="/new" element={<NewTest />} />
             <Route path="/run" element={<RunResults />} />
             <Route path="/runs" element={<RunsHistory />} />
             <Route path="/simulation/:id" element={<SimulationDetail />} />
