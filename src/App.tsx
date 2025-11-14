@@ -4,14 +4,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppLayout } from "./components/AppLayout";
-import Dashboard from "./pages/Dashboard";
-import Agents from "./pages/Agents";
-import AgentDetail from "./pages/AgentDetail";
-import Blueprints from "./pages/Blueprints";
-import Simulations from "./pages/Simulations";
-import SimulationDetail from "./pages/SimulationDetail";
-import Reports from "./pages/Reports";
-import Settings from "./pages/Settings";
+import NewTest from "./pages/NewTest";
+import RunResults from "./pages/RunResults";
+import RunsHistory from "./pages/RunsHistory";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,15 +19,9 @@ const App = () => (
       <BrowserRouter>
         <AppLayout>
           <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/agents" element={<Agents />} />
-            <Route path="/agents/:id" element={<AgentDetail />} />
-            <Route path="/blueprints" element={<Blueprints />} />
-            <Route path="/simulations" element={<Simulations />} />
-            <Route path="/simulations/:id" element={<SimulationDetail />} />
-            <Route path="/reports" element={<Reports />} />
-            <Route path="/settings" element={<Settings />} />
+            <Route path="/" element={<NewTest />} />
+            <Route path="/run" element={<RunResults />} />
+            <Route path="/runs" element={<RunsHistory />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AppLayout>
