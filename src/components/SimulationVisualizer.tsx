@@ -24,7 +24,13 @@ interface ScanWave {
   opacity: number;
 }
 
-export const SimulationVisualizer = ({ scenario }: { scenario: any }) => {
+export const SimulationVisualizer = ({ 
+  scenario,
+  onPhaseChange 
+}: { 
+  scenario: any;
+  onPhaseChange?: (phase: "searching" | "evaluating" | "selecting" | "interacting") => void;
+}) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [phaseLabel, setPhaseLabel] = useState("Initializing...");
   const animationRef = useRef<number>();
@@ -138,6 +144,7 @@ export const SimulationVisualizer = ({ scenario }: { scenario: any }) => {
       setTimeout(() => {
         phaseRef.current = phase;
         setPhaseLabel(label);
+        onPhaseChange?.(phase);
       }, time);
     });
 
