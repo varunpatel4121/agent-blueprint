@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppLayout } from "./components/AppLayout";
 import AgentDashboard from "./pages/AgentDashboard";
 import NewTest from "./pages/NewTest";
+import TestExecution from "./pages/TestExecution";
 import RunResults from "./pages/RunResults";
 import SimulationDetail from "./pages/SimulationDetail";
 import NotFound from "./pages/NotFound";
@@ -22,7 +23,9 @@ const App = () => (
           <Routes>
             <Route path="/" element={<AgentDashboard />} />
             <Route path="/new" element={<NewTest />} />
+            <Route path="/execution" element={<TestExecution />} />
             <Route path="/run" element={<RunResults />} />
+            <Route path="/runs" element={<AgentDashboard />} />
             <Route path="/simulation/:id" element={<SimulationDetail />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
