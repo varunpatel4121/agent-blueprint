@@ -190,21 +190,23 @@ const SimulationDetail = () => {
           </div>
 
           {/* What Happened */}
-          <div>
-            <h3 className="text-sm font-medium text-foreground mb-3">What Happened</h3>
-            <ul className="space-y-2">
-              {scenario.why.map((reason: string, idx: number) => (
-                <li key={idx} className="flex items-start gap-3">
-                  <div className={`w-1.5 h-1.5 rounded-full mt-2 ${
-                    scenario.status === "pass" ? "bg-success" :
-                    scenario.status === "fail" ? "bg-destructive" :
-                    "bg-warning"
-                  }`} />
-                  <p className="text-sm text-foreground flex-1">{reason}</p>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {scenario.why && Array.isArray(scenario.why) && scenario.why.length > 0 && (
+            <div>
+              <h3 className="text-sm font-medium text-foreground mb-3">What Happened</h3>
+              <ul className="space-y-2">
+                {scenario.why.map((reason: string, idx: number) => (
+                  <li key={idx} className="flex items-start gap-3">
+                    <div className={`w-1.5 h-1.5 rounded-full mt-2 ${
+                      scenario.status === "pass" ? "bg-success" :
+                      scenario.status === "fail" ? "bg-destructive" :
+                      "bg-warning"
+                    }`} />
+                    <p className="text-sm text-foreground flex-1">{reason}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           {/* Why It Matters */}
           {scenario.impact && (
@@ -217,7 +219,7 @@ const SimulationDetail = () => {
           )}
 
           {/* Suggested Improvements */}
-          {scenario.suggestions && (
+          {scenario.suggestions && Array.isArray(scenario.suggestions) && scenario.suggestions.length > 0 && (
             <div className="pt-4 border-t border-border">
               <h3 className="text-sm font-medium text-foreground mb-3">Suggested Improvements</h3>
               <ul className="space-y-2.5 mb-4">
